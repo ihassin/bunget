@@ -761,161 +761,165 @@ void bu_hci::_oncmd_complette(const no_evt_cmd_complete* nevcc)
 
     switch(nevcc->cmd)
     {
-        case RESET_CMD:
-             _TRACE("    RESET_CMD");
-             reset();
-             ::usleep(512000);
-            _reconfigure();
-            break;
-        case WRITE_LE_HOST_SUPPORTED_CMD:
-            {
-                _TRACE("    cc WRITE_LE_HOST_SUPPORTED_CMD");
-                uint8_t le = nevcc->data[0];
-                uint8_t simul = nevcc->data[1];
-            }
-            break;
-        case READ_LE_HOST_SUPPORTED_CMD:
-            {
-                _TRACE("    cc READ_LE_HOST_SUPPORTED_CMD");
-                uint8_t le = nevcc->data[0];
-                uint8_t simul = nevcc->data[1];
-            }
-            break;
-        case READ_LOCAL_VERSION_CMD:
-            {
-                _TRACE("    cc READ_LOCAL_VERSION_CMD");
-                uint8_t  hciVer = nevcc->data[0];
-                if (hciVer < 0x06)
-                {
-                    this->_onhci_state_chnaged(STATE_UNSUPORTED);
-                }
-                uint16_t hciRev = oa2t<uint16_t>(nevcc->data,1);
-                uint8_t lmpVer = nevcc->data[3];
-                uint16_t m1 = oa2t<uint16_t>(nevcc->data,4);
-                uint16_t lmpSubVer = oa2t<uint16_t>(nevcc->data,6);
+      case RESET_CMD:
+        _TRACE("    RESET_CMD");
+        reset();
+        ::usleep(512000);
+        _reconfigure();
+        break;
 
-                _pev->on_read_version(hciVer, hciRev, lmpVer, m1, lmpSubVer);
-                if (_state != STATE_POWEREDON)
-                {
-                    enable_adv(0);
-                    int interval=160;
-                    _pev->le_get_adv_interval(interval);
-                    _set_adv_params(interval);
-                }
-            }
-            break;
-        case READ_BD_ADDR_CMD:
-            {
-                _TRACE("    cc READ_BD_ADDR_CMD");
-                memcpy(&_address, nevcc->data, sizeof(bdaddr_t));
-                _addrtype = ADDR_PUBLIC;
-                _pev->on_mac_change(_address);
-                char out[32];
-                ba2str(&_address, out);
-                _TRACE("    BADDR: " << out);
-            }
-            break;
-        case LE_SET_ADVERTISING_PARAMETERS_CMD:
-            _TRACE("    cc LE_SET_ADVERTISING_PARAMETERS_CMD");
-            _onhci_state_chnaged(STATE_POWEREDON);
-            _pev->on_adv_status(_state);
-            break;
-        case LE_SET_ADVERTISING_DATA_CMD:
-            _TRACE("    cc LE_SET_ADVERTISING_DATA_CMD");
-            _pev->on_adv_data_status(nevcc->status);
-            _TRACE("======= READY TO ACCEPT CONNECTIONS ======");
-            break;
-        case LE_SET_SCAN_RESPONSE_DATA_CMD:
-            _TRACE("    cc LE_SET_SCAN_RESPONSE_DATA_CMD");
-            _pev->on_scan_resp_datat_status(nevcc->status);
-            break;
-        case LE_SET_ADVERTISE_ENABLE_CMD:
-            _TRACE("    cc LE_SET_ADVERTISE_ENABLE_CMD");
-            _pev->on_adv_enable(nevcc->status);
-            _TRACE("======= READY TO ACCEPT CONNECTIONS ======");
-            break;
-        case READ_RSSI_CMD:
-            {
-                _TRACE("    cc READ_RSSI_CMD");
-                handle =  oa2t<uint16_t>(nevcc->data,0); //result.readUInt16LE(0);
-                uint8_t rssi = nevcc->data[2];
-                _pev->on_rssi(handle, rssi);
-            }
-            break;
-        case LE_LTK_NEG_REPLY_CMD:
-            _TRACE("    cc LE_LTK_NEG_REPLY_CMD");
-            handle =  oa2t<uint16_t>(nevcc->data,0);
-            _pev->le_ltk_neg_reply(handle);
-            break;
-        case CMD_OPCODE_PACK(OCF_HOLD_MODE,OGF_LINK_POLICY):
-            {
-                _TRACE("    cc CMD_OPCODE_PACK(OCF_HOLD_MODE,OGF_LINK_POLICY)");
-                hold_mode_cp* hmcp = (hold_mode_cp*)nevcc->data;
-            }
-            break;
-        case CMD_OPCODE_PACK(OCF_INQUIRY,OGF_LINK_CTL):
-            {
-                _TRACE("    cc CMD_OPCODE_PACK(OCF_INQUIRY,OGF_LINK_CTL)");
-            }
-            break;
-        case CMD_OPCODE_PACK(OCF_LE_READ_BUFFER_SIZE,OGF_LE_CTL):
-            {
-                _TRACE("    cc CMD_OPCODE_PACK(OCF_LE_READ_BUFFER_SIZE,OGF_LE_CTL)");
+      case WRITE_LE_HOST_SUPPORTED_CMD:
+        _TRACE("    cc WRITE_LE_HOST_SUPPORTED_CMD");
+        break;
 
+      case READ_LE_HOST_SUPPORTED_CMD:
+        _TRACE("    cc READ_LE_HOST_SUPPORTED_CMD");
+        break;
+
+      case READ_LOCAL_VERSION_CMD:
+        {
+          _TRACE("    cc READ_LOCAL_VERSION_CMD");
+          uint8_t  hciVer = nevcc->data[0];
+          if (hciVer < 0x06)
+          {
+              this->_onhci_state_chnaged(STATE_UNSUPORTED);
+          }
+          uint16_t hciRev = oa2t<uint16_t>(nevcc->data,1);
+          uint8_t lmpVer = nevcc->data[3];
+          uint16_t m1 = oa2t<uint16_t>(nevcc->data,4);
+          uint16_t lmpSubVer = oa2t<uint16_t>(nevcc->data,6);
+
+          _pev->on_read_version(hciVer, hciRev, lmpVer, m1, lmpSubVer);
+          if (_state != STATE_POWEREDON)
+          {
+            enable_adv(0);
+            int interval=160;
+            _pev->le_get_adv_interval(interval);
+            _set_adv_params(interval);
+          }
+        }
+        break;
+
+      case READ_BD_ADDR_CMD:
+        {
+            _TRACE("    cc READ_BD_ADDR_CMD");
+            memcpy(&_address, nevcc->data, sizeof(bdaddr_t));
+            _addrtype = ADDR_PUBLIC;
+            _pev->on_mac_change(_address);
+            char out[32];
+            ba2str(&_address, out);
+            _TRACE("    BADDR: " << out);
+        }
+        break;
+
+      case LE_SET_ADVERTISING_PARAMETERS_CMD:
+        _TRACE("    cc LE_SET_ADVERTISING_PARAMETERS_CMD");
+        _onhci_state_chnaged(STATE_POWEREDON);
+        _pev->on_adv_status(_state);
+        break;
+
+      case LE_SET_ADVERTISING_DATA_CMD:
+        _TRACE("    cc LE_SET_ADVERTISING_DATA_CMD");
+        _pev->on_adv_data_status(nevcc->status);
+        _TRACE("======= READY TO ACCEPT CONNECTIONS ======");
+        break;
+
+      case LE_SET_SCAN_RESPONSE_DATA_CMD:
+        _TRACE("    cc LE_SET_SCAN_RESPONSE_DATA_CMD");
+        _pev->on_scan_resp_datat_status(nevcc->status);
+        break;
+
+      case LE_SET_ADVERTISE_ENABLE_CMD:
+        _TRACE("    cc LE_SET_ADVERTISE_ENABLE_CMD");
+        _pev->on_adv_enable(nevcc->status);
+        _TRACE("======= READY TO ACCEPT CONNECTIONS ======");
+        break;
+
+      case READ_RSSI_CMD:
+        {
+            _TRACE("    cc READ_RSSI_CMD");
+            handle =  oa2t<uint16_t>(nevcc->data,0); //result.readUInt16LE(0);
+            uint8_t rssi = nevcc->data[2];
+            _pev->on_rssi(handle, rssi);
+        }
+        break;
+
+      case LE_LTK_NEG_REPLY_CMD:
+        _TRACE("    cc LE_LTK_NEG_REPLY_CMD");
+        handle =  oa2t<uint16_t>(nevcc->data,0);
+        _pev->le_ltk_neg_reply(handle);
+        break;
+
+      case CMD_OPCODE_PACK(OCF_HOLD_MODE,OGF_LINK_POLICY):
+        _TRACE("    cc CMD_OPCODE_PACK(OCF_HOLD_MODE,OGF_LINK_POLICY)");
+        break;
+
+      case CMD_OPCODE_PACK(OCF_INQUIRY,OGF_LINK_CTL):
+          _TRACE("    cc CMD_OPCODE_PACK(OCF_INQUIRY,OGF_LINK_CTL)");
+        break;
+
+      case CMD_OPCODE_PACK(OCF_LE_READ_BUFFER_SIZE,OGF_LE_CTL):
+        {
+            _TRACE("    cc CMD_OPCODE_PACK(OCF_LE_READ_BUFFER_SIZE,OGF_LE_CTL)");
+
+            uint16_t mtu = oa2t<uint16_t>(nevcc->data, 0);
+            uint16_t maxmtu = oa2t<uint8_t>(nevcc->data, 2);
+            if(mtu == 0){
+                _read_buffer_size(); //force a BT buffer because this sucks
+            } else {
+                _aclMtu=mtu;
+                _aclPendingMax=maxmtu;
+                TRACE("OCF_LE_READ_BUFFER_SIZE: mtu=" << int(_aclMtu) << ", pendingMax=" << int(maxmtu));
+            }
+        }
+        break;
+
+      case CMD_OPCODE_PACK(OCF_READ_BUFFER_SIZE,OGF_INFO_PARAM):
+        {
+             _TRACE("    cc CMD_OPCODE_PACK(OCF_READ_BUFFER_SIZE,OGF_INFO_PARAM)");
+            if (nevcc->status==0) {
                 uint16_t mtu = oa2t<uint16_t>(nevcc->data, 0);
-                uint16_t maxmtu = oa2t<uint8_t>(nevcc->data, 2);
-                if(mtu == 0){
-                    _read_buffer_size(); //force a BT buffer because this sucks
-                } else {
+                uint16_t maxmtu = oa2t<uint16_t>(nevcc->data, 3);
+                if(mtu && maxmtu){
                     _aclMtu=mtu;
                     _aclPendingMax=maxmtu;
-                    TRACE("OCF_LE_READ_BUFFER_SIZE: mtu=" << int(_aclMtu) << ", pendingMax=" << int(maxmtu));
+                    TRACE("OCF_READ_BUFFER_SIZE: mtu=" << int(_aclMtu) << ", pendingMax=" << int(maxmtu));
                 }
             }
-            break;
-        case CMD_OPCODE_PACK(OCF_READ_BUFFER_SIZE,OGF_INFO_PARAM):
-            {
-                 _TRACE("    cc CMD_OPCODE_PACK(OCF_READ_BUFFER_SIZE,OGF_INFO_PARAM)");
-                if (nevcc->status==0) {
-                    uint16_t mtu = oa2t<uint16_t>(nevcc->data, 0);
-                    uint16_t maxmtu = oa2t<uint16_t>(nevcc->data, 3);
-                    if(mtu && maxmtu){
-                        _aclMtu=mtu;
-                        _aclPendingMax=maxmtu;
-                        TRACE("OCF_READ_BUFFER_SIZE: mtu=" << int(_aclMtu) << ", pendingMax=" << int(maxmtu));
-                    }
-                }
-            }
-            break;
-            case CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_HOST_CTL):
-                {
-                    bybuff trace;
-                    _TRACE("    cc CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_HOST_CTL)");
-                    set_event_mask_cp* p = (set_event_mask_cp*)nevcc->data;
-                    trace.append(p->mask, 8);
-                    _TRACE("BT-Mask:" << trace.to_string());
+        }
+        break;
 
-                }
-            break;
-            case CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_LE_CTL):
-                {
-                    bybuff trace;
-                    _TRACE("    cc CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_LE_CTL)");
-                    set_event_mask_cp* p = (set_event_mask_cp*)nevcc->data;
-                    trace.append(p->mask, 8);
-                    _TRACE("LE-Mask:" << trace.to_string());
+      case CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_HOST_CTL):
+        {
+            bybuff trace;
+            _TRACE("    cc CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_HOST_CTL)");
+            set_event_mask_cp* p = (set_event_mask_cp*)nevcc->data;
+            trace.append(p->mask, 8);
+            _TRACE("BT-Mask:" << trace.to_string());
 
-                }
-            break;
-        default:
-            {
-                uint16_t ogf = CMD_OPCODE_OGF(nevcc->cmd);
-                uint16_t ocf = CMD_OPCODE_OCF(nevcc->cmd);
-                _TRACE("    cc UNK command: OCF=" << std::hex <<
-                                                int(ocf) <<
-                                                ", OGF=" << int(ogf) << std::dec);
-            }
-            break;
+        }
+        break;
+    
+      case CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_LE_CTL):
+        {
+            bybuff trace;
+            _TRACE("    cc CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_LE_CTL)");
+            set_event_mask_cp* p = (set_event_mask_cp*)nevcc->data;
+            trace.append(p->mask, 8);
+            _TRACE("LE-Mask:" << trace.to_string());
+
+        }
+        break;
+      
+      default:
+        {
+          uint16_t ogf = CMD_OPCODE_OGF(nevcc->cmd);
+          uint16_t ocf = CMD_OPCODE_OCF(nevcc->cmd);
+          _TRACE("    cc UNK command: OCF=" << std::hex <<
+                                          ocf <<
+                                          ", OGF=" << ogf << std::dec);
+        }
+        break;
     }
 }
 

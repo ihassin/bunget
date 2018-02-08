@@ -279,7 +279,6 @@ bool hci_socket_ble::pool(int ttp, bool callhci)
 {
     fd_set          read;
     struct timeval  to;
-    int             tout = ttp==-1 ? 16 : ttp;
     bool            got = false;
 
     do{
