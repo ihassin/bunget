@@ -13,7 +13,7 @@
 #include <assert.h>
 #include "gattdefs.h"
 #include "bu_gatt.h"
-#include "ascon.h"
+#include "bu_asc.h"
 #include "libbungetpriv.h"
 
 /****************************************************************************************
