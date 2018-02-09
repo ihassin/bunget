@@ -10,8 +10,8 @@
 
 */
 
-#ifndef LIB_BULEX_PRIV
-#define LIB_BULEX_PRIV
+#ifndef LIBBUNGETPRIV_H
+#define LIBBUNGETPRIV_H
 
 
 #include <string>

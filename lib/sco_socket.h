@@ -19,11 +19,11 @@ class hci_data_eater;
 class sco_socket : public bt_socket
 {
 public:
-     sco_socket(hci_data_eater* hci):bt_socket(hci){}
-     ~sco_socket(){};
+    sco_socket(hci_data_eater* hci):bt_socket(hci){}
+    ~sco_socket(){};
 
-     void create();
-     void bind(const bdaddr_t& addr, uint8_t error, uint16_t psm=0, uint8_t cid=0);
+    void create();
+    void bind(const bdaddr_t& addr, uint8_t error, uint16_t psm=0, uint8_t cid=0);
 };
 
 #endif // SCO_SOCKET_H

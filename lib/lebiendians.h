@@ -21,12 +21,4 @@ inline int is_little_endian()
     return *((char*)&a) & 1;
 }
 
-
-
-
-
-
-
-
-
-#endif //_LEBINENDS_
+#endif

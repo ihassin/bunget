@@ -10,27 +10,28 @@
 
 */
 
-#ifndef NO_GAP_H
-#define NO_GAP_H
+#ifndef BU_GAP_H
+#define BU_GAP_H
+
+#include <vector>
 
 #include "include/uuid.h"
-#include <vector>
 #include "hci_socket.h"
 #include "bu_hci.h"
 #include "include/libbunget.h"
 
 using namespace bunget;
-#define USE_FIXED_PIN_FOR_PAIRING		(0x0)
+#define USE_FIXED_PIN_FOR_PAIRING	(0x0)
 #define DONOT_USE_FIXED_PIN_FOR_PAIRING	(0x01)
 #define MITM_PROTECTION_NOT_REQUIRED	(0x00)
 #define MITM_PROTECTION_REQUIRED        (0x01)
-#define OOB_AUTH_DATA_ABSENT		    (0x00)
-#define OOB_AUTH_DATA_PRESENT      		(0x01)
-#define BONDING				            (0x01)
-#define NO_BONDING				        (0x00)
-#define OGF_VENDOR_CMD		            0x3f
+#define OOB_AUTH_DATA_ABSENT		(0x00)
+#define OOB_AUTH_DATA_PRESENT      	(0x01)
+#define BONDING				(0x01)
+#define NO_BONDING			(0x00)
+#define OGF_VENDOR_CMD		        0x3f
 
-#define OCF_GAP_SET_AUTH_REQUIREMENT      0x0086
+#define OCF_GAP_SET_AUTH_REQUIREMENT    0x0086
 typedef struct {
     uint8_t	mitm_mode;
     uint8_t     oob_enable;
@@ -42,7 +43,6 @@ typedef struct {
     uint8_t     bonding_mode;
 } __attribute__ ((packed)) gap_set_auth_requirement_cp;
 #define GAP_SET_AUTH_REQUIREMENT_CP_SIZE 26
-
 
 class bybuff;
 class SrvDevice;
@@ -64,4 +64,4 @@ private:
     bu_hci*  _hci;
 };
 
-#endif // NO_GAP_H
+#endif

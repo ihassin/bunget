@@ -14,7 +14,10 @@
 
 #include "libbungetpriv.h"
 #include "bybuff.h"
+
+#ifndef BU_HCI_H
 #include "bu_hci.h"
+#endif
 
 /****************************************************************************************
 */
@@ -83,10 +86,10 @@ void bu_hci::_set_hci_filter()
 
     struct  _PAACK8
     {
-        uint32_t    filter0;
-        uint32_t    filter1;
-        uint32_t    filter2;
-        uint16_t    filter3;
+      uint32_t    filter0;
+      uint32_t    filter1;
+      uint32_t    filter2;
+      uint16_t    filter3;
     }  filter =
     {
         btohl((1 << HCI_EVENT_PKT)| (1 << HCI_ACLDATA_PKT)),

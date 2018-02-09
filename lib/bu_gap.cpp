@@ -12,7 +12,11 @@
 #include <dlfcn.h>
 #include <vector>
 #include "libbungetpriv.h"
+
+#ifndef BU_GAP_H
 #include "bu_gap.h"
+#endif
+
 #include "uguid.h"
 #include "bybuff.h"
 #include "gattdefs.h"
@@ -22,9 +26,8 @@ static Cguid GUID_ZERO;
 
 /****************************************************************************************
 */
-bu_gap::bu_gap(bu_hci* hci)
+bu_gap::bu_gap(bu_hci* hci) : _hci(hci)
 {
-    _hci = hci;
 }
 
 /****************************************************************************************

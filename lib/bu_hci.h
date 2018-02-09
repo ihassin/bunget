@@ -10,8 +10,8 @@
 
 */
 
-#ifndef NO_HCI_H
-#define NO_HCI_H
+#ifndef BU_HCI_H
+#define BU_HCI_H
 
 #include <iostream>
 #include <deque>

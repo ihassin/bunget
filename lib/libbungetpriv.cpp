@@ -18,7 +18,6 @@
 #include "bu_asc.h"
 #include "bu_gap.h"
 #include "bu_gatt.h"
-#include "hci_config.h"
 
 #define MIN_NOTY_INTERVAL    128  // for hci USB
 // #define MIN_NOTY_INTERVAL    64   // for hci UART

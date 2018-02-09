@@ -60,8 +60,8 @@ private:
     int         _loops;
     uint8_t     _address[8];
     int32_t     _addressType;
-	uint8_t		_buff[512];
-	int			_bytes;
+    uint8_t	_buff[512];
+    int		_bytes;
 };
 
 #endif // HCI_SOCKET_H

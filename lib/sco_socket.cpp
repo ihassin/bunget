@@ -24,14 +24,14 @@ void sco_socket::create()
 */
 void sco_socket::bind(const bdaddr_t& src, uint8_t srctype, uint16_t psm, uint8_t cid)
 {
-    struct sockaddr_sco addr;
+  struct sockaddr_sco addr;
 
-    memset(&addr, 0, sizeof(addr));
-    addr.sco_family = AF_BLUETOOTH;
-    bacpy(&addr.sco_bdaddr, &src);
+  memset(&addr, 0, sizeof(addr));
+  addr.sco_family = AF_BLUETOOTH;
+  bacpy(&addr.sco_bdaddr, &src);
 
-    if (::bind(_sock, (struct sockaddr *) &addr, sizeof(addr)) < 0)
-    {
-        _THROW(0);
-    }
+  if (::bind(_sock, (struct sockaddr *) &addr, sizeof(addr)) < 0)
+  {
+    _THROW(0);
+  }
 }

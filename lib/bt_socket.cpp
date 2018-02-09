@@ -9,55 +9,52 @@
     products without the written consent of the author: marrius9876@gmail.com
 
 */
+#ifndef BT_SOCKET
 #include "bt_socket.h"
-#include "uguid.h"
+#endif
 
-#include "bu_hci.h"
+#ifndef LIBBUNGETPRIV_H
 #include "libbungetpriv.h"
+#endif
 
 /****************************************************************************************
 */
-typedef enum
+bt_socket::bt_socket(hci_data_eater* hci): _sock(0), _hci(hci)
 {
-    BT_IO_L2CAP,
-    BT_IO_RFCOMM,
-    BT_IO_SCO,
-    BT_IO_INVALID,
-} BtIOType;
+}
 
 /****************************************************************************************
 */
 bt_socket::~bt_socket()
 {
-    close();
+  close();
 }
 
 /****************************************************************************************
 */
 void bt_socket::close()
 {
-    if(_sock>0)
-    {
-        ::close(_sock);
-        _sock = 0;
-    }
+  if(_sock>0)
+  {
+    ::close(_sock);
+    _sock = 0;
+  }
 }
 
 /****************************************************************************************
 */
 int bt_socket::read(uint8_t* buffer, int sizeb)
 {
-    return ::read(this->_sock, buffer, sizeb);
+  return ::read(this->_sock, buffer, sizeb);
 }
 
 /****************************************************************************************
 */
 int bt_socket:: writeocts(const uint8_t* buffer, int sizeb)
 {
-
-    bybuff  data(buffer,sizeb);
-    int r = ::write(this->_sock, buffer, sizeb);
-    TRACE("\n<--[" <<int(data.length())<<"/"<<r<<"]" << data.to_string());
-    ::fsync(this->_sock);
-	return r;
+  bybuff data(buffer,sizeb);
+  int r = ::write(this->_sock, buffer, sizeb);
+  TRACE("\n<--[" <<int(data.length())<<"/"<<r<<"]" << data.to_string());
+  ::fsync(this->_sock);
+  return r;
 }

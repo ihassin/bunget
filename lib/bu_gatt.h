@@ -10,9 +10,8 @@
 
 */
 
-#ifndef NO_GATT_H
-#define NO_GATT_H
-
+#ifndef BU_GATT_H
+#define BU_GATT_H
 
 #include <vector>
 #include <map>
@@ -35,8 +34,6 @@ struct WriteRequest
     uint16_t    _offset;
     bybuff      _data;
 };
-
-
 
 class bu_gatt : public hci_data_eater
 {
@@ -80,4 +77,4 @@ private:
     bool            _bread_request;
 };
 
-#endif // NO_GATT_H
+#endif

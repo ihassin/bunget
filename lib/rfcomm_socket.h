@@ -19,11 +19,11 @@
 class rfcomm_socket : public bt_socket
 {
 public:
-     rfcomm_socket(hci_data_eater* hci):bt_socket(hci){}
-     ~rfcomm_socket(){};
+    rfcomm_socket(hci_data_eater* hci):bt_socket(hci){}
+    ~rfcomm_socket(){};
 
-     void create();
-     void bind(const bdaddr_t& addr, uint8_t channel, uint16_t psm=0, uint8_t cid=0);
+    void create();
+    void bind(const bdaddr_t& addr, uint8_t channel, uint16_t psm=0, uint8_t cid=0);
 };
 
-#endif // RFCOMM_SOCKET_H
+#endif

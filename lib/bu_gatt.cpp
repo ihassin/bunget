@@ -12,7 +12,11 @@
 #include <iostream>
 #include <assert.h>
 #include "gattdefs.h"
+
+#ifndef BU_GATT_H
 #include "bu_gatt.h"
+#endif
+
 #include "bu_asc.h"
 #include "libbungetpriv.h"
 
@@ -24,124 +28,124 @@ typedef void  (bu_gatt::*phndl)(const sdata& data);
 */
 bu_gatt::bu_gatt(bu_hci* hci):_hci(hci),_indicator(0)
 {
-    reset();
+  reset();
 }
 
 /****************************************************************************************
 */
 void    bu_gatt::reset()
 {
-    _maxMtu  =  256;
-    _mtu     =  23;
-    _preparedWriteRequest  =  0;
-    _uidsize = 2;
-    _bread_request=false;
+  _maxMtu  =  256;
+  _mtu     =  23;
+  _preparedWriteRequest  =  0;
+  _uidsize = 2;
+  _bread_request=false;
 }
 
 /****************************************************************************************
 */
 bu_gatt::~bu_gatt()
 {
-    //Ctx->Srv(hci->dev_id())->data_unsubscribe(this);
+  //Ctx->Srv(hci->dev_id())->data_unsubscribe(this);
 }
 
 /****************************************************************************************
 */
 void bu_gatt::setAclPtr(bu_asc* pacls)
 {
-    _pacls = pacls;
-    if(pacls){
-        _hci->srv()->data_subscribe(this);
-    }
-    else
-        _hci->srv()->data_unsubscribe(this);
+  _pacls = pacls;
+  if(pacls){
+      _hci->srv()->data_subscribe(this);
+  }
+  else
+      _hci->srv()->data_unsubscribe(this);
 }
 
 /****************************************************************************************
 */
 int  bu_gatt::_dummy_q(const sdata& data, bybuff& b)
 {
-    return 0;
+  return 0;
 }
 
 /****************************************************************************************
 */
 int bu_gatt::on_sock_data(uint8_t code, const sdata& data)
 {
-    uint8_t rqt = data.data[0];
-    bybuff  ret;
-    bybuff   trace(data.data,data.len);
+  uint8_t rqt = data.data[0];
+  bybuff  ret;
+  bybuff   trace(data.data,data.len);
 
-    switch(rqt)
-    {
-        case ATT_OP_MTU_REQ://2
-        {
-            uint16_t mtu = oa2t<uint16_t>(data.data,1);
-	    uint16_t mtu2 = htobs(mtu);
-            if (mtu2 < 23)
-                mtu2 = 23;
-            else if (mtu2 > _maxMtu)
-                mtu2 = _maxMtu;
-            _mtu = mtu2;
-	    TRACE("mtu = " << int(_mtu));
-            ret << uint8_t(ATT_OP_MTU_RESP);
-            ret << uint16_t(htobs(_mtu));
-        }
-        break;
+  switch(rqt)
+  {
+      case ATT_OP_MTU_REQ://2
+      {
+          uint16_t mtu = oa2t<uint16_t>(data.data,1);
+          uint16_t mtu2 = htobs(mtu);
+          if (mtu2 < 23)
+              mtu2 = 23;
+          else if (mtu2 > _maxMtu)
+              mtu2 = _maxMtu;
+          _mtu = mtu2;
+          TRACE("mtu = " << int(_mtu));
+          ret << uint8_t(ATT_OP_MTU_RESP);
+          ret << uint16_t(htobs(_mtu));
+      }
+      break;
 
-    case ATT_OP_FIND_INFO_REQ:
-        _info_q(data, ret);
-        break;
-    case ATT_OP_FIND_BY_TYPE_REQ:
-        _find_type_q(data, ret);
-        break;
-    case ATT_OP_READ_BY_TYPE_REQ:
-        _type_q(data,ret);
-        break;
-    case ATT_OP_READ_REQ:
-        _read_q(data, ret);
-        break;
-    case ATT_OP_READ_BLOB_REQ:
-        _read_blob(data, ret);
-        break;
-    case ATT_OP_READ_BY_GROUP_REQ:
-    case ATT_OP_READ_BY_GROUP_RESP:
-        _group_q(data, ret);
-        break;
-    case ATT_OP_WRITE_REQ:
-        _write_q(data,ret);
-        break;
-    case ATT_OP_WRITE_CMD:
-        _write_cmd(data,ret);
-        break;
-    case ATT_OP_PREP_WRITE_REQ:
-        _prep_wq(data,ret);
-        break;
-    case ATT_OP_EXEC_WRITE_REQ:
-        _exec_wq(data,ret);
-        break;
-    case ATT_OP_HANDLE_CNF:
-        break;
-    case ATT_OP_READ_MULTI_REQ:
-    case ATT_OP_SIGNED_WRITE_CMD:
-    default:
-        break;
-    }
+  case ATT_OP_FIND_INFO_REQ:
+      _info_q(data, ret);
+      break;
+  case ATT_OP_FIND_BY_TYPE_REQ:
+      _find_type_q(data, ret);
+      break;
+  case ATT_OP_READ_BY_TYPE_REQ:
+      _type_q(data,ret);
+      break;
+  case ATT_OP_READ_REQ:
+      _read_q(data, ret);
+      break;
+  case ATT_OP_READ_BLOB_REQ:
+      _read_blob(data, ret);
+      break;
+  case ATT_OP_READ_BY_GROUP_REQ:
+  case ATT_OP_READ_BY_GROUP_RESP:
+      _group_q(data, ret);
+      break;
+  case ATT_OP_WRITE_REQ:
+      _write_q(data,ret);
+      break;
+  case ATT_OP_WRITE_CMD:
+      _write_cmd(data,ret);
+      break;
+  case ATT_OP_PREP_WRITE_REQ:
+      _prep_wq(data,ret);
+      break;
+  case ATT_OP_EXEC_WRITE_REQ:
+      _exec_wq(data,ret);
+      break;
+  case ATT_OP_HANDLE_CNF:
+      break;
+  case ATT_OP_READ_MULTI_REQ:
+  case ATT_OP_SIGNED_WRITE_CMD:
+  default:
+      break;
+  }
 
-    if (ret.length())
-    {
-        this->_send(ret);
-        return 1;
-    }
-    return 0;
+  if (ret.length())
+  {
+      this->_send(ret);
+      return 1;
+  }
+  return 0;
 }
 
 /****************************************************************************************
 */
 int bu_gatt::_send(const bybuff& data)
 {
-    _pacls->write(ATT_CID, data);
-    return 0;
+  _pacls->write(ATT_CID, data);
+  return 0;
 };
 
 /****************************************************************************************

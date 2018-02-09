@@ -16,24 +16,23 @@
 */
 void rfcomm_socket::create()
 {
-
-    _sock = ::socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
-    if(_sock<=0) _THROW(0);
+  _sock = ::socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+  if(_sock<=0) _THROW(0);
 }
 
 /****************************************************************************************
 */
 void rfcomm_socket::bind(const bdaddr_t& src, uint8_t channel, uint16_t psm, uint8_t cid)
 {
-    struct sockaddr_rc addr;
+  struct sockaddr_rc addr;
 
-    ::memset(&addr, 0, sizeof(addr));
-    addr.rc_family = AF_BLUETOOTH;
-    ::bacpy(&addr.rc_bdaddr, &src);
-    addr.rc_channel = channel;
+  ::memset(&addr, 0, sizeof(addr));
+  addr.rc_family = AF_BLUETOOTH;
+  ::bacpy(&addr.rc_bdaddr, &src);
+  addr.rc_channel = channel;
 
-    if (::bind(_sock, (struct sockaddr *) &addr, sizeof(addr)) < 0)
-    {
-        _THROW(0);
-    }
+  if (::bind(_sock, (struct sockaddr *) &addr, sizeof(addr)) < 0)
+  {
+      _THROW(0);
+  }
 }

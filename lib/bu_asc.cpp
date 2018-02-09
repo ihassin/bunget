@@ -9,8 +9,14 @@
     products without the written consent of the author: marrius9876@gmail.com
 
 */
+#ifndef BU_ASC_H
 #include "bu_asc.h"
+#endif
+
+#ifndef BU_HCI_H
 #include "bu_hci.h"
+#endif
+
 #include "libbungetpriv.h"
 
 /****************************************************************************************

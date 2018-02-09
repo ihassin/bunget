@@ -62,7 +62,7 @@ public:
 class bt_socket
 {
 public:
-    bt_socket(hci_data_eater* hci):_sock(0),_hci(hci){};
+    bt_socket(hci_data_eater* hci);
     virtual ~bt_socket();
 
     virtual void create()=0;
