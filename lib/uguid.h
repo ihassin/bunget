@@ -9,9 +9,8 @@
     products without the written consent of the author: marrius9876@gmail.com
 
 */
-
-#ifndef UCUID_H
-#define UCUID_H
+#ifndef UGUID_H
+#define UGUID_H
 
 
 #include <iostream>

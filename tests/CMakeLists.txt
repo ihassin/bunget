@@ -12,6 +12,10 @@ set(CutestRoot ${ProjectsRoot}/cutest)
 set(CutestSource ${CutestRoot}/lib)
 set(CutestBinary ${CutestRoot}/link)
 
+set(BungetRoot ${ProjectsRoot}/bunget)
+set(BungetSource ${BungetRoot}/lib)
+set(BungetBinary ${BungetRoot}/link)
+
 add_subdirectory(${CutestSource} ${CutestBinary} EXCLUDE_FROM_ALL)
 
 link_directories(${CutestBinary})
@@ -22,5 +26,6 @@ add_executable(cutest ${SRC_FILES})
 target_link_libraries (cutest cutestLib bungetLib)
 
 include_directories(${CutestSource})
+include_directories(${BungetSource})
 
 set(EXECUTABLE_OUTPUT_PATH ../bin)
