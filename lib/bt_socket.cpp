@@ -9,10 +9,9 @@
     products without the written consent of the author: marrius9876@gmail.com
 
 */
-
+#include "bt_socket.h"
 #include "uguid.h"
 
-#include "hci_socket.h"
 #include "bu_hci.h"
 #include "libbungetpriv.h"
 

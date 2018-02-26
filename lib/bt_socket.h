@@ -11,9 +11,11 @@
 */
 
 
-#ifndef HCI_SOCKET
-#define HCI_SOCKET
+#ifndef BT_SOCKET
+#define BT_SOCKET
 
+#include <string>
+#include <map>
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
@@ -31,22 +33,18 @@
 #include "include/libbunget.h"
 #ifdef USE_UVLIB
 #include <uv.h>
-#endif //NO_USE_UVLIB
-#include <string>
-#include <map>
+#endif
 
-#define BT_SNDMTU		    12
-#define BT_RCVMTU		    13
+#define BT_SNDMTU           12
+#define BT_RCVMTU           13
 #define HCI_CHANNEL_USER    1
 #define ATT_CID             4
-
 
 #define _THROW(ex)      {::perror(""); throw bunget::hexecption(__FILE__,__FUNCTION__,errno,ex);}
 #define _TRACEF()       std::cout << __FILE__ << " / " << __LINE__ << "\n"
 #define LOOP_SLEEP_IDLE      1000
 #define LOOP_SLEEP_NORM      100
 #define LOOP_SLEEP_FAST      10
-
 
 class bt_socket;
 class hci_error;
@@ -85,5 +83,4 @@ protected:
     hci_data_eater* _hci;
 };
 
-
-#endif // HCI_SOCKET
+#endif

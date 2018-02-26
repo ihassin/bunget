@@ -13,7 +13,7 @@
 #include <assert.h>
 #include "gattdefs.h"
 #include "bu_gatt.h"
-#include "ascon.h"
+#include "bu_asc.h"
 #include "libbungetpriv.h"
 
 /****************************************************************************************
@@ -43,72 +43,6 @@ void    bu_gatt::reset()
 bu_gatt::~bu_gatt()
 {
     //Ctx->Srv(hci->dev_id())->data_unsubscribe(this);
-}
-
-/****************************************************************************************
-*/
-static const char* type2string(uint8_t type)
-{
-    switch(type)
-    {
-    case ATT_OP_ERROR             : //  0x01;
-        return " ATT_OP_ERROR";
-    case ATT_OP_MTU_REQ           : //  0x02;
-        return "ATT_OP_MTU_REQ";
-    case ATT_OP_MTU_RESP          : //  0x03;
-        return "ATT_OP_MTU_RESP";
-    case ATT_OP_FIND_INFO_REQ     : //  0x04;
-        return "ATT_OP_FIND_INFO_REQ";
-    case ATT_OP_FIND_INFO_RESP    : //  0x05;
-        return "ATT_OP_FIND_INFO_RESP";
-    case ATT_OP_FIND_BY_TYPE_REQ  : //  0x06;
-        return "OP_FIND_BY_TYPE_REQ";
-    case ATT_OP_FIND_BY_TYPE_RESP : //  0x07;
-        return "ATT_OP_FIND_BY_TYPE_RESP";
-    case ATT_OP_READ_BY_TYPE_REQ  : //  0x08;
-        return "ATT_OP_READ_BY_TYPE_REQ";
-    case ATT_OP_READ_BY_TYPE_RESP : //  0x09;
-        return "ATT_OP_READ_BY_TYPE_RESP";
-    case ATT_OP_READ_REQ          : //  0x0a;
-        return "ATT_OP_READ_REQ";
-    case ATT_OP_READ_RESP         : //  0x0b;
-        return "ATT_OP_READ_RESP";
-    case ATT_OP_READ_BLOB_REQ     : //  0x0c;
-        return "ATT_OP_READ_BLOB_REQ";
-    case ATT_OP_READ_BLOB_RESP    : //  0x0d;
-        return "ATT_OP_READ_BLOB_RESP";
-    case ATT_OP_READ_MULTI_REQ    : //  0x0e;
-        return "ATT_OP_READ_MULTI_REQ";
-    case ATT_OP_READ_MULTI_RESP   : //  0x0f;
-        return "ATT_OP_READ_MULTI_RESP ";
-    case ATT_OP_READ_BY_GROUP_REQ : //  0x10;
-        return "ATT_OP_READ_BY_GROUP_REQ ";
-    case ATT_OP_READ_BY_GROUP_RESP: //  0x11;
-        return "ATT_OP_READ_BY_GROUP_RESP";
-    case ATT_OP_WRITE_REQ         : //  0x12;
-        return "ATT_OP_WRITE_REQ";
-    case ATT_OP_WRITE_RESP        : //  0x13;
-        return "ATT_OP_WRITE_RESP";
-    case ATT_OP_WRITE_CMD         : //  0x52;
-        return "ATT_OP_WRITE_CMD";
-    case ATT_OP_PREP_WRITE_REQ    : //  0x16;
-        return "ATT_OP_PREP_WRITE_REQ";
-    case ATT_OP_PREP_WRITE_RESP   : //  0x17;
-        return "ATT_OP_PREP_WRITE_RESP";
-    case ATT_OP_EXEC_WRITE_REQ    : //  0x18;
-        return "ATT_OP_EXEC_WRITE_RE";
-    case ATT_OP_EXEC_WRITE_RESP   : //  0x19;
-        return "ATT_OP_EXEC_WRITE_RESP";
-    case ATT_OP_HANDLE_NOTIFY     : //  0x1b;
-        return "ATT_OP_HANDLE_NOTIFY";
-    case ATT_OP_HANDLE_IND        : //  0x1d;
-        return "ATT_OP_HANDLE_IND";
-    case ATT_OP_HANDLE_CNF        : //  0x1e;
-        return "ATT_OP_HANDLE_CNF";
-    default:
-        break;
-    };
-    return "ATT_NOT_KNOWN";
 }
 
 /****************************************************************************************

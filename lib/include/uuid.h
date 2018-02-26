@@ -29,13 +29,13 @@
 #include "bluetooth.h"
 
 #ifdef DEBUG
-#   define TRACE(x)    std::cout << x << " \n"
+#   define TRACE(x)    std::cout << x << "\n"
 #else
 #   define TRACE(x)
 #endif //
 
 #define _TRACE(x)
-#define ERROR(x)    std::cout <<"E:"<< x << " \n"
+#define ERROR(x)    std::cout <<"E:"<< x << "\n"
 
 #ifdef __cplusplus
 extern "C" {

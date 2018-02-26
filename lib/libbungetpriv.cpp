@@ -15,7 +15,7 @@
 #include <sys/time.h>
 #include "bungetconf.h"
 #include "libbungetpriv.h"
-#include "ascon.h"
+#include "bu_asc.h"
 #include "bu_gap.h"
 #include "bu_gatt.h"
 #include "hci_config.h"

@@ -15,7 +15,7 @@
 #include <iomanip>
 #include "secmanp.h"
 #include "bu_hci.h"
-#include "ascon.h"
+#include "bu_asc.h"
 #include "libbungetpriv.h"
 
 /****************************************************************************************
