@@ -16,7 +16,7 @@ include_directories ("./include")
 add_definitions(-DDEBUG)
 add_definitions(-DACL_MTU_FRAG)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ggdb")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ggdb -Wall")
 set(LIBRARY_OUTPUT_PATH ../link)
 
 file(GLOB SRC_FILES *.cpp *.h)
