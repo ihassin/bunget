@@ -16,6 +16,13 @@
 #include "bu_asc.h"
 #include "libbungetpriv.h"
 
+#undef DEBUG
+#undef ERROR
+#include <log4cpp/Category.hh>
+#include <log4cpp/PropertyConfigurator.hh>
+
+static log4cpp::Category& log = log4cpp::Category::getInstance(std::string("gatt"));
+
 /****************************************************************************************
 */
 typedef void  (bu_gatt::*phndl)(const sdata& data);
@@ -24,18 +31,18 @@ typedef void  (bu_gatt::*phndl)(const sdata& data);
 */
 bu_gatt::bu_gatt(bu_hci* hci):_hci(hci),_indicator(0)
 {
-    reset();
+  reset();
 }
 
 /****************************************************************************************
 */
 void    bu_gatt::reset()
 {
-    _maxMtu  =  256;
-    _mtu     =  23;
-    _preparedWriteRequest  =  0;
-    _uidsize = 2;
-    _bread_request=false;
+  _maxMtu  =  256;
+  _mtu     =  23;
+  _preparedWriteRequest  =  0;
+  _uidsize = 2;
+  _bread_request=false;
 }
 
 /****************************************************************************************
@@ -157,126 +164,124 @@ int  bu_gatt::_reply_err(uint8_t code, uint16_t hndl, uint8_t status, bybuff& bu
 */
 int bu_gatt::_group_q(const sdata& data, bybuff& ret)
 {
-    uint16_t hs = oa2t<uint16_t>(data.data,1);
-    uint16_t he = oa2t<uint16_t>(data.data,3);
+  uint16_t hs = oa2t<uint16_t>(data.data,1);
+  uint16_t he = oa2t<uint16_t>(data.data,3);
 
-    TRACE(__FUNCTION__ << " start h = " << int(hs) << "," << int(he) << "\n");
+  log.info("bu_gatt::_group_q: %d %d", hs, he);
 
-    Cguid    g(data.data+5);
-    std::vector<GattSrv*>   srvs;
-    Harray&  handlers = srv()->handlers();
-    int      subservices = H_SRV;
+  Cguid    g(data.data+5);
+  std::vector<GattSrv*>   srvs;
+  Harray&  handlers = srv()->handlers();
+  int      subservices = H_SRV;
 
-	ret.reset();
-	if(g.as16() != GATT_PRIM_SVC_UUID)
-        	subservices =  H_SRV_INC;
+  ret.reset();
+  if(g.as16() != GATT_PRIM_SVC_UUID)
+    subservices =  H_SRV_INC;
 
-	for(const auto& e : handlers)
-	{
-        	if(e->_hndl>he)break;
-		if(e->_hndl<hs)continue;
-		        if(e->_type==subservices)
-		{
-	            TRACE("adding handler: " << int(e->_hndl) << " type = " << e->_type);
-		    srvs.push_back((GattSrv*)e);
-		}
-	}
-	size_t nsrvs = srvs.size();
-	if(nsrvs==0)
-	{
-		return _reply_err(ATT_OP_READ_BY_GROUP_REQ, hs, ATT_ECODE_ATTR_NOT_FOUND, ret);
-	}
-	if(g.as16() == GATT_PRIM_SVC_UUID || g.as16() == GATT_INCLUDE_UUID)
+  for(const auto& e : handlers)
+  {
+    if(e->_hndl>he)break;
+    if(e->_hndl<hs)continue;
+    if(e->_type==subservices)
     {
-        GattSrv* pgel = srvs[0];
-        uint8_t  lengthPerService = pgel->_is128 ? 20 : 6;
-        size_t   elems = std::min(size_t(( _mtu - 2 ) / lengthPerService), nsrvs);
-        elems = std::min(elems, srvs.size());
-
-        ret << uint8_t(ATT_OP_READ_BY_GROUP_RESP);
-        ret << uint8_t(lengthPerService);
-        TRACE("writing service:" << elems );
-        for(const auto& ps : srvs)
-        {
-            ret << uint16_t(ps->_hndl);
-            ret << uint16_t(ps->_lasthndl);
-
-            TRACE(" adding service " << std::hex << int(ps->_hndl) << std::dec<<"\n");
-            ret << ps->_cuid;
-
-            if(--elems==0)
-                break;
-        }
+      log.info("bu_gatt::_group_q:adding handler: %d %d", e->_hndl, e->_type);
+      srvs.push_back((GattSrv*)e);
     }
-    else
+  }
+  size_t nsrvs = srvs.size();
+  if(nsrvs==0)
+  {
+    return _reply_err(ATT_OP_READ_BY_GROUP_REQ, hs, ATT_ECODE_ATTR_NOT_FOUND, ret);
+  }
+  if(g.as16() == GATT_PRIM_SVC_UUID || g.as16() == GATT_INCLUDE_UUID)
+  {
+    GattSrv* pgel = srvs[0];
+    uint8_t  lengthPerService = pgel->_is128 ? 20 : 6;
+    size_t   elems = std::min(size_t(( _mtu - 2 ) / lengthPerService), nsrvs);
+    elems = std::min(elems, srvs.size());
+
+    ret << uint8_t(ATT_OP_READ_BY_GROUP_RESP);
+    ret << uint8_t(lengthPerService);
+    log.info("bu_gatt::_group_q:elems: %d", elems);
+    for(const auto& ps : srvs)
     {
-        return _reply_err(ATT_OP_READ_BY_GROUP_REQ, hs, ATT_ECODE_ATTR_NOT_FOUND, ret);
-    }
+      ret << uint16_t(ps->_hndl);
+      ret << uint16_t(ps->_lasthndl);
 
-    std::vector<IHandler*> els;
-    for(auto& e : handlers)
-    {
-        els.push_back(e);
+      log.info("bu_gatt::_group_q:adding service: %d", ps->_hndl);
+      ret << ps->_cuid;
+
+      if(--elems==0)
+          break;
     }
-    srv()->_cb_proc->onServicesDiscovered(els);
-    return 1;
+  }
+  else
+  {
+      return _reply_err(ATT_OP_READ_BY_GROUP_REQ, hs, ATT_ECODE_ATTR_NOT_FOUND, ret);
+  }
+
+  std::vector<IHandler*> els;
+  for(auto& e : handlers)
+  {
+      els.push_back(e);
+  }
+  srv()->_cb_proc->onServicesDiscovered(els);
+  return 1;
 }
 
 /****************************************************************************************
 */
 int bu_gatt::_type_q(const sdata& data, bybuff& ret)
 {
-    uint16_t hs = oa2t<uint16_t>(data.data,1);
-    uint16_t he = oa2t<uint16_t>(data.data,3);
-    Cguid    g(data.data+5);
+  uint16_t hs = oa2t<uint16_t>(data.data,1);
+  uint16_t he = oa2t<uint16_t>(data.data,3);
+  Cguid    g(data.data+5);
 
+  log.info("bu_gatt::_type_q: %d %d", hs, he);
 
+  ret.reset();
+  if (g.as16() == GATT_CHARAC_UUID)
+  {
+      std::vector<GHandler*>     chrs;
+      Harray&                    handlers = srv()->handlers();
 
-    TRACE(__FUNCTION__ << "start h = " << int(hs) << "," << int(he) << "\n");
+      for(const auto& e : handlers)
+      {
+          if(e->_hndl>he)break;
+          if(e->_hndl<hs)continue;
+          if(e->_type==H_CHR )
+          {
+            log.info("bu_gatt::_type_q:adding char:%d", e->_hndl);
+            chrs.push_back(e);
+          }
+      }
+      if(chrs.size()==0)
+      {
+          return _reply_err(ATT_OP_READ_BY_TYPE_REQ, hs, ATT_ECODE_ATTR_NOT_FOUND, ret);
+      }
+      GHandler* pbegin = (GHandler*)chrs[0];
+      uint8_t   lengthPerCharacteristic = pbegin->_is128 ? 21 : 7;
+      size_t    elems = std::min(chrs.size(), size_t(( _mtu -2 ) / lengthPerCharacteristic));
 
-    ret.reset();
-    if (g.as16() == GATT_CHARAC_UUID)
-    {
-        std::vector<GHandler*>     chrs;
-        Harray&                    handlers = srv()->handlers();
+      ret <<  uint8_t(ATT_OP_READ_BY_TYPE_RESP);
+      ret <<  uint8_t(lengthPerCharacteristic);
 
-        for(const auto& e : handlers)
-        {
-            if(e->_hndl>he)break;
-            if(e->_hndl<hs)continue;
-            if(e->_type==H_CHR )
-            {
-                TRACE("adding characteristics1: " << e->_hndl);
-                chrs.push_back(e);
-            }
-        }
-        if(chrs.size()==0)
-        {
-            return _reply_err(ATT_OP_READ_BY_TYPE_REQ, hs, ATT_ECODE_ATTR_NOT_FOUND, ret);
-        }
-        GHandler* pbegin = (GHandler*)chrs[0];
-        uint8_t   lengthPerCharacteristic = pbegin->_is128 ? 21 : 7;
-        size_t    elems = std::min(chrs.size(), size_t(( _mtu -2 ) / lengthPerCharacteristic));
+      for(const auto& pc : chrs)
+      {
+          ret << uint16_t(pc->_hndl);
+          ret << uint8_t(pc->_props);
+          ret << uint16_t(pc->_hvalue);
 
-        ret <<  uint8_t(ATT_OP_READ_BY_TYPE_RESP);
-        ret <<  uint8_t(lengthPerCharacteristic);
-
-        for(const auto& pc : chrs)
-        {
-            ret << uint16_t(pc->_hndl);
-            ret << uint8_t(pc->_props);
-            ret << uint16_t(pc->_hvalue);
-
-            if(lengthPerCharacteristic==7)
-            {
-                ret << uint16_t(pc->_cuid.as16());
-            }
-            else
-                ret << pc->_cuid;
-            if(--elems==0)
-                break;
-        }
-        return 1;
+          if(lengthPerCharacteristic==7)
+          {
+              ret << uint16_t(pc->_cuid.as16());
+          }
+          else
+              ret << pc->_cuid;
+          if(--elems==0)
+              break;
+      }
+      return 1;
     }
 
     bool        atrb = false;

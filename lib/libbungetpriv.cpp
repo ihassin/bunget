@@ -23,11 +23,17 @@
 #define MIN_NOTY_INTERVAL    128  // for hci USB
 // #define MIN_NOTY_INTERVAL    64   // for hci UART
 
-
-
 #define MIN_ADV_INTERVAL     160 // do not change this
 extern bool     __alive;
 ContextImpl*    Ctx;
+
+#undef DEBUG
+#undef ERROR
+#include <log4cpp/Category.hh>
+#include <log4cpp/PropertyConfigurator.hh>
+#define ERROR
+
+static log4cpp::Category& log = log4cpp::Category::getInstance(std::string("service"));
 
 /****************************************************************************************
 */
@@ -440,7 +446,7 @@ bool SrvDevice::onSpin()
             _curnoty = _poolNextNotyHndl();
             if(_curnoty)
             {
-                TRACE("Notify Enabled for:" << std::hex << int(_curnoty) << std::dec);
+              log.info("SrvDevice::onSpin:notify enabled for %d", _curnoty);
             }
             rv = _cb_proc->onSpin(this, _curnoty);
             _notytime = ct;
