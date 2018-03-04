@@ -4,6 +4,10 @@
 #include "cutest.h"
 #endif
 
+#undef DEBUG
+#include <log4cpp/Category.hh>
+#include <log4cpp/PropertyConfigurator.hh>
+
 CuSuite* CuGetSuite();
 
 void RunAllTests(void)
@@ -23,6 +27,9 @@ void RunAllTests(void)
 
 int main(void)
 {
-    RunAllTests();
-}
+  log4cpp::PropertyConfigurator::configure("log4cpp.properties");
+  log4cpp::Category& rootLog = log4cpp::Category::getRoot();
+  log4cpp::Category& mainLog = log4cpp::Category::getInstance(std::string("main"));
 
+  RunAllTests();
+}

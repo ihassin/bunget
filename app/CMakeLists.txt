@@ -11,7 +11,7 @@ add_definitions(-DDEBUG)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fexceptions -Wall -fpermissive -ggdb")
 
 add_executable (bunget main.cpp crypto.cpp)
-target_link_libraries (bunget bungetLib crypto++)
+target_link_libraries (bunget bungetLib crypto++ /usr/local/lib/liblog4cpp.so)
 
 include_directories(lib/include)
 

@@ -23,7 +23,7 @@ link_directories(${CutestBinary})
 file(GLOB SRC_FILES *.cpp *.h)
 add_executable(cutest ${SRC_FILES})
 
-target_link_libraries (cutest cutestLib bungetLib)
+target_link_libraries (cutest cutestLib bungetLib /usr/local/lib/liblog4cpp.so pthread)
 
 include_directories(${CutestSource})
 include_directories(${BungetSource})
