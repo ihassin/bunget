@@ -9,8 +9,6 @@
     products without the written consent of the author: marrius9876@gmail.com
 
 */
-
-
 #ifndef BT_SOCKET
 #define BT_SOCKET
 
@@ -62,7 +60,7 @@ public:
 class bt_socket
 {
 public:
-    bt_socket(hci_data_eater* hci):_sock(0),_hci(hci){};
+    bt_socket(hci_data_eater* hci);
     virtual ~bt_socket();
 
     virtual void create()=0;
@@ -81,6 +79,7 @@ protected:
     int     _sock;
     int     _mode;
     hci_data_eater* _hci;
+    
 };
 
 #endif

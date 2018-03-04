@@ -16,6 +16,11 @@
 #include "bybuff.h"
 #include "bu_hci.h"
 
+#undef DEBUG
+#undef ERROR
+#include <log4cpp/Category.hh>
+#include <log4cpp/PropertyConfigurator.hh>
+
 /****************************************************************************************
 */
 bu_hci::bu_hci(SrvDevice* psrv):_pev(psrv),
@@ -536,8 +541,16 @@ int bu_hci::on_sock_data(uint8_t code, const sdata& buffer) //received
   uint16_t blen = buffer.len;
   std::string scase="NOT HANDLED ";
   bybuff  trace(buffer.data, buffer.len);
-  TRACE("{-->["<< int(buffer.len) <<"]"<< trace.to_string());
+//  TRACE("{-->["<< int(buffer.len) <<"]"<< trace.to_string());
 
+  log4cpp::Category& log = log4cpp::Category::getInstance(std::string("socket"));
+  char buff[256];
+  sprintf(buff, "Reading Len: %d", int(buffer.len));
+  std::string logString = buff;
+  logString = logString + ": " + trace.to_string();
+  log.info(logString);
+
+  
   if (HCI_EVENT_PKT == eventType)
   {
               uint8_t  subEventType = buffer.data[1];
