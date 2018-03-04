@@ -21,6 +21,8 @@
 #include <log4cpp/Category.hh>
 #include <log4cpp/PropertyConfigurator.hh>
 
+static log4cpp::Category& log = log4cpp::Category::getInstance(std::string("socket"));
+
 /****************************************************************************************
 */
 bu_hci::bu_hci(SrvDevice* psrv):_pev(psrv),
@@ -84,44 +86,45 @@ bool bu_hci::start(int delay)
 */
 void bu_hci::_set_hci_filter()
 {
-    TRACE(__FUNCTION__);
+  log.info("bu_hci::_set_hci_filter:entry");
 
-    struct  _PAACK8
-    {
-        uint32_t    filter0;
-        uint32_t    filter1;
-        uint32_t    filter2;
-        uint16_t    filter3;
-    }  filter =
-    {
-        btohl((1 << HCI_EVENT_PKT)| (1 << HCI_ACLDATA_PKT)),
+  struct  _PAACK8
+  {
+      uint32_t    filter0;
+      uint32_t    filter1;
+      uint32_t    filter2;
+      uint16_t    filter3;
+  }  filter =
+  {
+    btohl((1 << HCI_EVENT_PKT)| (1 << HCI_ACLDATA_PKT)),
 #ifdef ACL_MTU_FRAG
-        btohl( (1 << EVT_NUM_COMP_PKTS)|
-               (1 << EVT_DISCONN_COMPLETE) |
-               (1 << EVT_ENCRYPT_CHANGE) |
-               (1 << EVT_CMD_COMPLETE) |
-               (1 << EVT_CMD_STATUS)),
+    btohl( (1 << EVT_NUM_COMP_PKTS)|
+           (1 << EVT_DISCONN_COMPLETE) |
+           (1 << EVT_ENCRYPT_CHANGE) |
+           (1 << EVT_CMD_COMPLETE) |
+           (1 << EVT_CMD_STATUS)),
 #else
-        btohl( (1 << EVT_DISCONN_COMPLETE) |
-               (1 << EVT_ENCRYPT_CHANGE) |
-               (1 << EVT_CMD_COMPLETE) |
-               (1 << EVT_CMD_STATUS)),
+    btohl( (1 << EVT_DISCONN_COMPLETE) |
+           (1 << EVT_ENCRYPT_CHANGE) |
+           (1 << EVT_CMD_COMPLETE) |
+           (1 << EVT_CMD_STATUS)),
 #endif
-        btohs(1 << (EVT_LE_META_EVENT - 32)),
-        0
-    };
+    btohs(1 << (EVT_LE_META_EVENT - 32)),
+    0
+};
 #ifdef DEBUG
     bybuff by((const uint8_t*)&filter, sizeof(filter));
     TRACE("[]<=" << by.to_string());
 #endif
-    _socket->set_filter((const uint8_t*)&filter, sizeof(filter));
+  _socket->set_filter((const uint8_t*)&filter, sizeof(filter));
 }
 
 /****************************************************************************************
 */
 void bu_hci::_set_event_mask()
 {
-  TRACE(__FUNCTION__);
+  log.info("bu_hci::_set_event_mask:entry");
+
   struct  _PAACK8
   {
     hcihr   _hcihr;
@@ -152,7 +155,6 @@ void bu_hci::_set_event_mask()
 */
 void bu_hci::_set_le_event_mask()
 {
-  _TRACE(__FUNCTION__);
   struct  _PAACK8
   {
       hcihr   _hcihr;
@@ -183,7 +185,6 @@ void bu_hci::_set_le_event_mask()
 */
 void bu_hci::_read_version()
 {
-  _TRACE(__FUNCTION__);
   hcihr   cmd =
   {
     HCI_COMMAND_PKT,
@@ -197,7 +198,6 @@ void bu_hci::_read_version()
 */
 void bu_hci::_read_baddr()
 {
-  _TRACE(__FUNCTION__);
   hcihr   cmd =
   {
     HCI_COMMAND_PKT,
@@ -211,7 +211,6 @@ void bu_hci::_read_baddr()
 */
 void bu_hci::_write_le_host()
 {
-  _TRACE(__FUNCTION__);
   struct  _PAACK8
   {
       hcihr                       hdr;
@@ -235,7 +234,6 @@ void bu_hci::_write_le_host()
 */
 void bu_hci::_read_le_hosts()
 {
-  _TRACE(__FUNCTION__);
   hcihr cmd =
   {
     HCI_COMMAND_PKT,
@@ -249,7 +247,6 @@ void bu_hci::_read_le_hosts()
 */
 void bu_hci::_set_adv_params(int interval)
 {
-  _TRACE(__FUNCTION__);
   struct  _PAACK8
   {
     hcihr   _hcihr;
@@ -280,7 +277,6 @@ void bu_hci::_set_adv_params(int interval)
 */
 void bu_hci::reset()
 {
-  _TRACE(__FUNCTION__);
   hcihr    hdr =
   {
     HCI_COMMAND_PKT,
@@ -294,7 +290,6 @@ void bu_hci::reset()
 */
 void bu_hci::set_adv_data(const sdata& data)
 {
-  _TRACE(__FUNCTION__);
   struct _PAACK8
   {
     hcihr    hdr;
@@ -323,7 +318,6 @@ void bu_hci::set_adv_data(const sdata& data)
 */
 void bu_hci::set_sca_res_data(const sdata& data)
 {
-  _TRACE(__FUNCTION__);
   struct  _PAACK8
   {
     hcihr    hdr;
@@ -350,7 +344,6 @@ void bu_hci::set_sca_res_data(const sdata& data)
 */
 void bu_hci::enable_adv(uint8_t enable)
 {
-  _TRACE(__FUNCTION__);
   struct  _PAACK8
   {
     hcihr   hdr;
@@ -371,7 +364,6 @@ void bu_hci::enable_adv(uint8_t enable)
 */
 void bu_hci::disconnect(uint16_t handle, uint8_t reason)
 {
-  _TRACE(__FUNCTION__);
   struct  _PAACK8
   {
     hcihr   hdr;
@@ -395,7 +387,6 @@ void bu_hci::disconnect(uint16_t handle, uint8_t reason)
 */
 void bu_hci::read_rssi(uint16_t handle)
 {
-  _TRACE(__FUNCTION__);
   struct  _PAACK8
   {
     hcihr       hdr;
@@ -414,7 +405,6 @@ void bu_hci::read_rssi(uint16_t handle)
 
 void bu_hci::_le_read_buffer_size()
 {
-  _TRACE(__FUNCTION__);
   struct _PAACK8
   {
     uint8_t hdr;
@@ -432,7 +422,6 @@ void bu_hci::_le_read_buffer_size()
 
 void bu_hci::_read_buffer_size()
 {
-  _TRACE(__FUNCTION__);
    struct _PAACK8
   {
     uint8_t hdr;
@@ -452,8 +441,6 @@ void bu_hci::_read_buffer_size()
 */
 void bu_hci::write_local_name(const char* name)
 {
-  _TRACE(__FUNCTION__);
-
   change_local_name_cp cp;
   memset(&cp, 0, sizeof(cp));
   strncpy((char *) cp.name, name, sizeof(cp.name));
@@ -464,7 +451,6 @@ void bu_hci::write_local_name(const char* name)
 */
 int bu_hci::read_local_name()
 {
-  _TRACE(__FUNCTION__);
   read_local_name_rp rp;
   send_cmd(OCF_READ_LOCAL_NAME, OGF_HOST_CTL, READ_LOCAL_NAME_RP_SIZE, &rp);
   return 0;
@@ -474,7 +460,6 @@ int bu_hci::read_local_name()
 */
 void bu_hci::send_cmd(uint16_t ocf, uint16_t ogf, uint8_t plen, void *param)
 {
-  _TRACE(__FUNCTION__);
   uint8_t loco[512];
   hci_command_hdr hc;
 
@@ -541,15 +526,12 @@ int bu_hci::on_sock_data(uint8_t code, const sdata& buffer) //received
   uint16_t blen = buffer.len;
   std::string scase="NOT HANDLED ";
   bybuff  trace(buffer.data, buffer.len);
-//  TRACE("{-->["<< int(buffer.len) <<"]"<< trace.to_string());
 
-  log4cpp::Category& log = log4cpp::Category::getInstance(std::string("socket"));
   char buff[256];
   sprintf(buff, "Reading Len: %d", int(buffer.len));
   std::string logString = buff;
   logString = logString + ": " + trace.to_string();
   log.info(logString);
-
   
   if (HCI_EVENT_PKT == eventType)
   {
@@ -756,7 +738,6 @@ int bu_hci::on_sock_data(uint8_t code, const sdata& buffer) //received
 */
 void bu_hci::on_error(const hci_error& error)
 {
-  _TRACE(__FUNCTION__);
   if (error.message == "network-error")
   {
     this->_onhci_state_chnaged(STATE_NETWORK_DOWN);
@@ -768,6 +749,8 @@ void bu_hci::on_error(const hci_error& error)
 void bu_hci::_oncmd_complette(const no_evt_cmd_complete* nevcc)
 {
   uint16_t    handle;
+
+  log.info("bu_hci::_oncmd_complette");
 
   switch(nevcc->cmd)
   {
@@ -870,8 +853,6 @@ void bu_hci::_oncmd_complette(const no_evt_cmd_complete* nevcc)
 
     case CMD_OPCODE_PACK(OCF_LE_READ_BUFFER_SIZE,OGF_LE_CTL):
       {
-        _TRACE("    cc CMD_OPCODE_PACK(OCF_LE_READ_BUFFER_SIZE,OGF_LE_CTL)");
-
         uint16_t mtu = oa2t<uint16_t>(nevcc->data, 0);
         uint16_t maxmtu = oa2t<uint8_t>(nevcc->data, 2);
         if(mtu == 0){
@@ -879,22 +860,19 @@ void bu_hci::_oncmd_complette(const no_evt_cmd_complete* nevcc)
         } else {
             _aclMtu=mtu;
             _aclPendingMax=maxmtu;
-            TRACE("OCF_LE_READ_BUFFER_SIZE: mtu=" << int(_aclMtu) << ", pendingMax=" << int(maxmtu));
         }
       }
       break;
 
     case CMD_OPCODE_PACK(OCF_READ_BUFFER_SIZE,OGF_INFO_PARAM):
       {
-        _TRACE("    cc CMD_OPCODE_PACK(OCF_READ_BUFFER_SIZE,OGF_INFO_PARAM)");
        if (nevcc->status==0) {
-           uint16_t mtu = oa2t<uint16_t>(nevcc->data, 0);
-           uint16_t maxmtu = oa2t<uint16_t>(nevcc->data, 3);
-           if(mtu && maxmtu){
-               _aclMtu=mtu;
-               _aclPendingMax=maxmtu;
-               TRACE("OCF_READ_BUFFER_SIZE: mtu=" << int(_aclMtu) << ", pendingMax=" << int(maxmtu));
-           }
+        uint16_t mtu = oa2t<uint16_t>(nevcc->data, 0);
+        uint16_t maxmtu = oa2t<uint16_t>(nevcc->data, 3);
+        if(mtu && maxmtu){
+          _aclMtu=mtu;
+          _aclPendingMax=maxmtu;
+        }
        }
       }
       break;
@@ -902,20 +880,16 @@ void bu_hci::_oncmd_complette(const no_evt_cmd_complete* nevcc)
     case CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_HOST_CTL):
       {
         bybuff trace;
-        _TRACE("    cc CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_HOST_CTL)");
         set_event_mask_cp* p = (set_event_mask_cp*)nevcc->data;
         trace.append(p->mask, 8);
-        _TRACE("BT-Mask:" << trace.to_string());
       }
       break;
 
     case CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_LE_CTL):
       {
         bybuff trace;
-        _TRACE("    cc CMD_OPCODE_PACK(OCF_SET_EVENT_MASK,OGF_LE_CTL)");
         set_event_mask_cp* p = (set_event_mask_cp*)nevcc->data;
         trace.append(p->mask, 8);
-        _TRACE("LE-Mask:" << trace.to_string());
       }
       break;
 
@@ -937,7 +911,6 @@ void bu_hci::_oncmd_complette(const no_evt_cmd_complete* nevcc)
 */
 void bu_hci::_onmeta(const no_evt_le_meta_event* leme)
 {
-  _TRACE(__FUNCTION__);
   if (leme->leMetaEventType == EVT_LE_CONN_COMPLETE)
   {
     _TRACE("mm EVT_LE_CONN_COMPLETE" );
@@ -980,7 +953,6 @@ void bu_hci::_onmeta(const no_evt_le_meta_event* leme)
 */
 void bu_hci::_onle_complette(const no_evt_le_meta_event* leme)
 {
-  _TRACE(__FUNCTION__);
   uint16_t handle = oa2t<uint16_t>(leme->data,0);
   uint8_t role = leme->data[2];
   HCI_ADDRTYPE addressType = leme->data[3]== 0x01 ? ADDR_RANDOM : ADDR_PUBLIC;
@@ -1012,7 +984,6 @@ void bu_hci::_onle_complette(const no_evt_le_meta_event* leme)
 */
 void bu_hci::_onle_con_update_complette(const no_evt_le_meta_event* leme)
 {
-  _TRACE(__FUNCTION__);
   uint16_t handle = oa2t<uint16_t>(leme->data,0);
   uint16_t interval = oa2t<uint16_t>(leme->data,2) * 1.25;
   uint16_t latency = oa2t<uint16_t>(leme->data,4); // TODO: multiplier?
@@ -1105,8 +1076,8 @@ int bu_hci::_poolsocket(int msecs, int callmain)
 */
 void bu_hci::_reconfigure()
 {
-  TRACE("==========================");
-  TRACE(__FUNCTION__);
+  log.info("bu_hci::_reconfigure:entry");
+
   this->_clear();
   this->_set_hci_filter();
   this->_set_event_mask();
@@ -1126,8 +1097,6 @@ void bu_hci::_reconfigure()
 
 void bu_hci::enque_acl(uint16_t handle, uint16_t cid, const sdata& sd)
 {
-  TRACE("::"<<__FUNCTION__);
-
   bybuff   aclbuf;
   uint16_t hf = (handle | (ACL_START_NO_FLUSH << 12));
 
@@ -1184,8 +1153,6 @@ void bu_hci::write_acl_chunk(uint16_t handle)
   std::deque<AclChunk>& dq = _aclOut[handle];
   if(dq.size())
   {
-    TRACE(__FUNCTION__);
-
     if(_aclPending.find(handle) == _aclPending.end())
       _aclPending[handle]=0;
     _aclPending[handle]++;
@@ -1218,7 +1185,6 @@ void bu_hci::_erase_AclOut(uint16_t handle)
 */
 void bu_hci::write_ack_packet(uint16_t handle, uint16_t cid, const sdata& data)
 {
-  _TRACE(__FUNCTION__);
   struct  _PAACK8
   {
     struct  _PAACK8

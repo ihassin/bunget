@@ -15,24 +15,33 @@
 #include "gattdefs.h"
 #include "libbungetpriv.h"
 
+#undef DEBUG
+#undef ERROR
+#include <log4cpp/Category.hh>
+#include <log4cpp/PropertyConfigurator.hh>
+
+static log4cpp::Category& log = log4cpp::Category::getInstance(std::string("gatt"));
+
 /****************************************************************************************
 */
-IHandler*    GattSrv::add_charact(uint16_t uid, uint8_t props, uint8_t secure, uint8_t format, uint8_t length, uint8_t *val)
+IHandler* GattSrv::add_charact(uint16_t uid, uint8_t props, uint8_t secure, uint8_t format, uint8_t length, uint8_t *val)
 {
-    GHandler* pci = new GHandler(H_CHR, _srv, this->_hndl, uid);
-    _ctor(pci, props,secure,format,length,val);
+  log.info("GattSrv::add_charact");
 
-    GHandler* pcv = this->_add_charct_value(pci->_hndl, uid, length, val);
-    pci->_hvalue = pcv->_hndl;
-    pcv->_hparent = pci->_hndl;
-    if(props & (PROPERTY_NOTIFY|PROPERTY_INDICATE))
-    {
-        uint8_t  val[]={0x00,0x00};
-        GHandler* pd = (GHandler*)pci->add_descriptor(0x2902,PROPERTY_READ|PROPERTY_WRITE_NO_RESPONSE|PROPERTY_WRITE,(uint8_t*)val,2);
-        pd->_hparent = pci->_hndl;
-        this->_lasthndl = pd->_hndl; //mcoo
-    }
-    return pci;
+  GHandler* pci = new GHandler(H_CHR, _srv, this->_hndl, uid);
+  _ctor(pci, props,secure,format,length,val);
+
+  GHandler* pcv = this->_add_charct_value(pci->_hndl, uid, length, val);
+  pci->_hvalue = pcv->_hndl;
+  pcv->_hparent = pci->_hndl;
+  if(props & (PROPERTY_NOTIFY|PROPERTY_INDICATE))
+  {
+      uint8_t  val[]={0x00,0x00};
+      GHandler* pd = (GHandler*)pci->add_descriptor(0x2902,PROPERTY_READ|PROPERTY_WRITE_NO_RESPONSE|PROPERTY_WRITE,(uint8_t*)val,2);
+      pd->_hparent = pci->_hndl;
+      this->_lasthndl = pd->_hndl; //mcoo
+  }
+  return pci;
 }
 
 /****************************************************************************************
@@ -132,14 +141,14 @@ const bt_uuid_t&   GattSrv::get_uid()const
     return _cuid._u128;
 }
 
-void        GattSrv::debug()
+void GattSrv::debug()
 {
-    TRACE("---------------------------------");
-    TRACE("service" << _name);
-    uint16_t uid = this->_cuid.as16();
-    TRACE("UUID:"<< std::hex <<  uid << std::dec);
-    TRACE("LAST HANDLE:"<< _lasthndl);
-    TRACE("HANDLE:"<< _hndl);
+  log.info("GattSrv::debug");
+//  TRACE("service" << _name);
+//  uint16_t uid = this->_cuid.as16();
+//  TRACE("UUID:"<< std::hex <<  uid << std::dec);
+//  TRACE("LAST HANDLE:"<< _lasthndl);
+//  TRACE("HANDLE:"<< _hndl);
 
 }
 
