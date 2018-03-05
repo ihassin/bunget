@@ -527,11 +527,7 @@ int bu_hci::on_sock_data(uint8_t code, const sdata& buffer) //received
   std::string scase="NOT HANDLED ";
   bybuff  trace(buffer.data, buffer.len);
 
-  char buff[256];
-  sprintf(buff, "Reading Len: %d", int(buffer.len));
-  std::string logString = buff;
-  logString = logString + ": " + trace.to_string();
-  log.info(logString);
+  log.info("bu_hci::on_sock_data: %d:%s", trace.length(), trace.to_string().c_str());
   
   if (HCI_EVENT_PKT == eventType)
   {
@@ -540,113 +536,118 @@ int bu_hci::on_sock_data(uint8_t code, const sdata& buffer) //received
 
       switch(subEventType)
       {
-          case EVT_DISCONN_COMPLETE:
-              scase="EVT_DISCONN_COMPLETE";
-              {
-                  evt_disconn_complete* pdc = (evt_disconn_complete*)(buffer.data+4);
-                  pdc->handle = htobs(pdc->handle);
-                  memcpy(&_dcached, pdc, sizeof(_dcached));
+        case EVT_DISCONN_COMPLETE:
+          scase="EVT_DISCONN_COMPLETE";
+          {
+            evt_disconn_complete* pdc = (evt_disconn_complete*)(buffer.data+4);
+            pdc->handle = htobs(pdc->handle);
+            memcpy(&_dcached, pdc, sizeof(_dcached));
 #ifdef ACL_MTU_FRAG
-                  flush_acl();
+            flush_acl();
 #endif //ACL_MTU_FRAG
-                  _clear();
-                  _pev->on_disconnect(pdc);
-                  _connected=false;
-              }
-              break;
-          case EVT_ENCRYPT_CHANGE:
-              scase="EVT_ENCRYPT_CHANGE";
-              {
-                  evt_encrypt_change* pec = (evt_encrypt_change*)(buffer.data+4);
-                  pec->handle=htobs(pec->handle);
-                  _pev->on_encrypt_chnage(pec);
-              }
-              break;
-          case EVT_CMD_COMPLETE:
-              scase="       [EVT_CMD_COMPLETE]";
-              {
-                  no_evt_cmd_complete* necc = (no_evt_cmd_complete*)(buffer.data+3);
-                  necc->cmd=htobs(necc->cmd);
-                  this->_oncmd_complette(necc);
-              }
-              break;
-          case EVT_LE_META_EVENT:
-              scase="EVT_LE_META_EVENT";
-              {
-                  no_evt_le_meta_event* pev = (no_evt_le_meta_event*)(buffer.data+3);
-                  this->_onmeta(pev);
-              }
-              break;
-          case EVT_CONN_REQUEST:
-              scase="EVT_CONN_REQUEST";
-              {
-                  evt_conn_request* preq= (evt_conn_request*)(buffer.data+4);
-                  bdaddr_t dest;
-                  baswap(&dest, &preq->bdaddr);
-                  memcpy(&preq->bdaddr,&dest,sizeof(dest));
-              }
-              break;
-          case  EVT_CMD_STATUS: //OCF_AUTH_REQUESTED
-              scase="EVT_CMD_STATUS";
-              {
-                  evt_cmd_status* pevs = (evt_cmd_status*)(buffer.data+4);
-                                      pevs->opcode = htobs(pevs->opcode);
-                                      uint16_t ogf = CMD_OPCODE_OGF(pevs->opcode);
-                                      uint16_t ocf = CMD_OPCODE_OCF(pevs->opcode);
+            _clear();
+            _pev->on_disconnect(pdc);
+            _connected=false;
+          }
+          break;
 
-                  TRACE("CMD_STATUS status:" <<int(pevs->status)<<" ncmd:" <<
-                                                                                               int(pevs->ncmd) << " opcode(C/G):" <<
-                                                                                               std::hex<<int(ocf) <<"/"<<int(ogf) << std::dec);
-                                      if(ocf == OCF_EXIT_PERIODIC_INQUIRY)
-                                      {
-                                              //send_cmd(OCF_INQUIRY_CANCEL, OGF_LINK_CTL,0,0);
-                                      }
+        case EVT_ENCRYPT_CHANGE:
+          scase="EVT_ENCRYPT_CHANGE";
+          {
+            evt_encrypt_change* pec = (evt_encrypt_change*)(buffer.data+4);
+            pec->handle=htobs(pec->handle);
+            _pev->on_encrypt_chnage(pec);
+          }
+          break;
 
-              }
-              break;
-          case EVT_REMOTE_NAME_REQ_COMPLETE:
-              scase="EVT_REMOTE_NAME_REQ_COMPLETE";
-              {
-                  evt_remote_name_req_complete* pnc = (evt_remote_name_req_complete*)(buffer.data+4);
-                  TRACE("remote name: " << pnc->name);
-              }
-              break;
+        case EVT_CMD_COMPLETE:
+          scase="       [EVT_CMD_COMPLETE]";
+          {
+            no_evt_cmd_complete* necc = (no_evt_cmd_complete*)(buffer.data+3);
+            necc->cmd=htobs(necc->cmd);
+            this->_oncmd_complete(necc);
+          }
+          break;
+
+        case EVT_LE_META_EVENT:
+          scase="EVT_LE_META_EVENT";
+          {
+            no_evt_le_meta_event* pev = (no_evt_le_meta_event*)(buffer.data+3);
+            this->_onmeta(pev);
+          }
+          break;
+
+        case EVT_CONN_REQUEST:
+          scase="EVT_CONN_REQUEST";
+          {
+            evt_conn_request* preq= (evt_conn_request*)(buffer.data+4);
+            bdaddr_t dest;
+            baswap(&dest, &preq->bdaddr);
+            memcpy(&preq->bdaddr,&dest,sizeof(dest));
+          }
+          break;
+
+        case  EVT_CMD_STATUS: //OCF_AUTH_REQUESTED
+          scase="EVT_CMD_STATUS";
+          {
+            evt_cmd_status* pevs = (evt_cmd_status*)(buffer.data+4);
+            pevs->opcode = htobs(pevs->opcode);
+//            uint16_t ogf = CMD_OPCODE_OGF(pevs->opcode);
+            uint16_t ocf = CMD_OPCODE_OCF(pevs->opcode);
+
+            log.info("bu_hci::on_sock_data: EVT_CMD_STATUS: s:%d c: %d ogf:%d", pevs->status, pevs->ncmd, ocf);
+
+            if(ocf == OCF_EXIT_PERIODIC_INQUIRY)
+            {
+              //send_cmd(OCF_INQUIRY_CANCEL, OGF_LINK_CTL,0,0);
+            }
+          }
+         break;
+
+        case EVT_REMOTE_NAME_REQ_COMPLETE:
+            scase="EVT_REMOTE_NAME_REQ_COMPLETE";
+            {
+                evt_remote_name_req_complete* pnc = (evt_remote_name_req_complete*)(buffer.data+4);
+                TRACE("remote name: " << pnc->name);
+            }
+            break;
+
 #ifdef ACL_MTU_FRAG
-      case EVT_NUM_COMP_PKTS:
-              scase="EVT_NUM_COMP_PKTS";
-              {
-                  uint8_t	nhandles = uint8_t(buffer.data[3]);
-                 // TRACE("GOT number of completted acl packets:" << int(nhandles));
-                  for(uint8_t h=0; h<nhandles; h++)
-                  {
-                      no_acl_handler_packet* pconfirm = (no_acl_handler_packet*)(buffer.data + 4 + (h*4));
-                      pconfirm->handler = htobs(pconfirm->handler);
-                      pconfirm->packet = htobs(pconfirm->packet);
+    case EVT_NUM_COMP_PKTS:
+            scase="EVT_NUM_COMP_PKTS";
+            {
+                uint8_t	nhandles = uint8_t(buffer.data[3]);
+               // TRACE("GOT number of completted acl packets:" << int(nhandles));
+                for(uint8_t h=0; h<nhandles; h++)
+                {
+                    no_acl_handler_packet* pconfirm = (no_acl_handler_packet*)(buffer.data + 4 + (h*4));
+                    pconfirm->handler = htobs(pconfirm->handler);
+                    pconfirm->packet = htobs(pconfirm->packet);
 
-                    //  TRACE("GOT Pending handler:" << int(pconfirm->handler) << ", " << int(pconfirm->packet));
+                  //  TRACE("GOT Pending handler:" << int(pconfirm->handler) << ", " << int(pconfirm->packet));
 
-                      const auto& ah = _aclPending.find(pconfirm->handler);
-                      if(ah == this->_aclPending.end())
-                      {
-                         // TRACE("HANDLER "<<  int(pconfirm->handler)  <<" NOT FOUND");
-                          continue;
-                      }
-                      else
-                      {
-                          ah->second -= pconfirm->packet;
-                          if(ah->second <= 0)
-                          {
-                           //   TRACE("DELETE ALL HANDLER packets:" <<",["<<int(pconfirm->handler) <<"]" << int(ah->second));
-                              _erase_AclOut(ah->first);
-                          }
-                      }
-                  }
-                  this->flush_acl();
-      }
-      break;
+                    const auto& ah = _aclPending.find(pconfirm->handler);
+                    if(ah == this->_aclPending.end())
+                    {
+                       // TRACE("HANDLER "<<  int(pconfirm->handler)  <<" NOT FOUND");
+                        continue;
+                    }
+                    else
+                    {
+                        ah->second -= pconfirm->packet;
+                        if(ah->second <= 0)
+                        {
+                         //   TRACE("DELETE ALL HANDLER packets:" <<",["<<int(pconfirm->handler) <<"]" << int(ah->second));
+                            _erase_AclOut(ah->first);
+                        }
+                    }
+                }
+                this->flush_acl();
+    }
+    break;
 #endif //ACL_MTU_FRAG
-          default:
-              break;
+        default:
+            break;
       }//switch
   }
 
@@ -746,11 +747,11 @@ void bu_hci::on_error(const hci_error& error)
 
 /****************************************************************************************
 */
-void bu_hci::_oncmd_complette(const no_evt_cmd_complete* nevcc)
+void bu_hci::_oncmd_complete(const no_evt_cmd_complete* nevcc)
 {
   uint16_t    handle;
 
-  log.info("bu_hci::_oncmd_complette");
+  log.info("bu_hci::_oncmd_complete");
 
   switch(nevcc->cmd)
   {
@@ -919,8 +920,7 @@ void bu_hci::_onmeta(const no_evt_le_meta_event* leme)
   }
   else if (leme->leMetaEventType == EVT_LE_CONN_UPDATE_COMPLETE)
   {
-    _TRACE("mm EVT_LE_CONN_UPDATE_COMPLETE" );
-    this->_onle_con_update_complette(leme);
+    this->_onle_con_update_complete(leme);
   }
   else if(leme->leMetaEventType == EVT_LE_ADVERTISING_REPORT)
   {
@@ -966,14 +966,8 @@ void bu_hci::_onle_complette(const no_evt_le_meta_event* leme)
   char bsttr[32];
   ba2str(&addr, bsttr);
 
-  TRACE("cc HANDLE = " << (int)handle);
-  TRACE("cc role = " << (int)role);
-  TRACE("cc address type = " << (int)addressType);
-  TRACE("cc address = " << (const char*)bsttr);
-  TRACE("cc interval = " << (int)interval);
-  TRACE("cc latency = " << (int)latency);
-  TRACE("cc supervision timeout = " << (int)supervisionTimeout);
-  TRACE("cc master clock accuracy = " << (int)masterClockAccuracy);
+  log.info("bu_hci::_onle_complette: h:%d r:%d at:%d a:%s i:%d l:%d s:%d a:%d",
+    handle, role, addressType, bsttr, interval, latency, supervisionTimeout, masterClockAccuracy);
 
   _erase_AclOut(handle);
   _pev->on_le_connected(leme->leMetaEventStatus, handle, role, addressType, addr,
@@ -982,17 +976,15 @@ void bu_hci::_onle_complette(const no_evt_le_meta_event* leme)
 
 /****************************************************************************************
 */
-void bu_hci::_onle_con_update_complette(const no_evt_le_meta_event* leme)
+void bu_hci::_onle_con_update_complete(const no_evt_le_meta_event* leme)
 {
   uint16_t handle = oa2t<uint16_t>(leme->data,0);
   uint16_t interval = oa2t<uint16_t>(leme->data,2) * 1.25;
   uint16_t latency = oa2t<uint16_t>(leme->data,4); // TODO: multiplier?
   int supervisionTimeout = oa2t<uint16_t>(leme->data,6) * 10;
 
-  TRACE("uu handle = " << handle);
-  TRACE("uu interval = " << interval);
-  TRACE("uu latency = " << latency);
-  TRACE("uu supervision timeout = " << supervisionTimeout);
+  log.info("bu_hci::_onle_con_update_complete: h:%d i:%d l:%d s:%d", handle, interval, latency, supervisionTimeout);
+
   _pev->on_le_conn_update_complette_shit(leme->leMetaEventStatus,handle, interval, latency, supervisionTimeout);
 }
 

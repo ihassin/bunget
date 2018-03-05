@@ -90,7 +90,8 @@ int bu_gatt::on_sock_data(uint8_t code, const sdata& data)
             else if (mtu2 > _maxMtu)
                 mtu2 = _maxMtu;
             _mtu = mtu2;
-	    TRACE("mtu = " << int(_mtu));
+            log.info("bu_gatt::on_sock_data: mtu:%d", _mtu);
+
             ret << uint8_t(ATT_OP_MTU_RESP);
             ret << uint16_t(htobs(_mtu));
         }

@@ -595,7 +595,6 @@ int SrvDevice::write_charact(GHandler* ph)
 {
     if(_status != eRUNNING)
     {
-        ERROR("E: cannot write durring initialisation");
         return -1;
     }
 
@@ -612,7 +611,6 @@ int SrvDevice::write_descr(GHandler* ph)
 {
     if(_status != eRUNNING)
     {
-        ERROR("E: cannot write durring initialisation");
         return -1;
     }
 

@@ -237,10 +237,10 @@ protected:
     void _read_buffer_size();
     int  _on_hci_data(uint8_t code, const sdata& buffer);
     int  _on_acl_data(uint8_t code, const sdata& buffer);
-    void _oncmd_complette(const no_evt_cmd_complete* nevcc);
+    void _oncmd_complete(const no_evt_cmd_complete* nevcc);
     void _onmeta(const no_evt_le_meta_event* neleme);
     void _onle_complette(const no_evt_le_meta_event* neleme);
-    void _onle_con_update_complette(const no_evt_le_meta_event* neleme);
+    void _onle_con_update_complete(const no_evt_le_meta_event* neleme);
     void _reconfigure();
     int  _poolsocket(int milis=64, int callmain=true);
     void _set_hci_filter();
