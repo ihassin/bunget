@@ -12,7 +12,7 @@ This fork offers:
 * A testing framework
 
 # Contributing
-Fork it (git@github.com:ihassin/piperi.git)
+Fork it (git@github.com:ihassin/bunget.git)
 Create your feature branch (git checkout -b my-new-feature)
 Commit your changes (git commit -am 'Add some feature')
 Push to the branch (git push origin my-new-feature)
